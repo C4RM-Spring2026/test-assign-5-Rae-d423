@@ -1,29 +1,45 @@
 import numpy as np
 
+# --- 1. Bond Price Function ---
+def getBondPrice(y, face, couponRate, m, ppy=1):
+    r = y / ppy
+    c = (face * couponRate) / ppy
+    n = m * ppy
+    periods = np.arange(1, n + 1)
+    # Vectorized PV calculation
+    bond_price = np.sum(c / (1 + r)**periods) + (face / (1 + r)**n)
+    return bond_price
+
+# --- 2. Bond Duration Function ---
+def getBondDuration(y, face, couponRate, m, ppy=1):
+    r = y / ppy
+    c = (face * couponRate) / ppy
+    n = m * ppy
+    t = np.arange(1, n + 1)
+    cf = np.full(n, c)
+    cf[-1] += face
+    pvcf = cf / (1 + r)**t
+    bond_price = np.sum(pvcf)
+    w = pvcf / bond_price
+    # Annual duration = (Sum of weighted periods) / payments per year
+    duration = np.sum(w * t) / ppy
+    return duration
+
+# --- 3. FizzBuzz Function (The one failing) ---
 def FizzBuzz(start, finish):
-    """
-    Vectorized FizzBuzz implementation using NumPy.
-    No loops allowed.
-    """
-    # 1. Create an array of numbers from start to finish (inclusive)
-    # We use dtype=object so the array can hold both strings and integers
+    # Must include 'finish', so we use finish + 1
     numvec = np.arange(start, finish + 1)
+    # Must use dtype=object to mix strings and ints
     objvec = np.array(numvec, dtype=object)
     
-    # 2. Define boolean masks for multiples of 3, 5, and 15
-    is_fizz = (numvec % 3 == 0)
-    is_buzz = (numvec % 5 == 0)
-    is_fizzbuzz = (numvec % 15 == 0)
+    # Create masks
+    mask3 = (numvec % 3 == 0)
+    mask5 = (numvec % 5 == 0)
+    mask15 = (numvec % 15 == 0)
     
-    # 3. Apply the replacements using the masks
-    # Order matters: replace specific cases (15) after or alongside general cases
-    objvec[is_fizz] = "fizz"
-    objvec[is_buzz] = "buzz"
-    objvec[is_fizzbuzz] = "fizzbuzz"
+    # Apply replacements in specific order
+    objvec[mask3] = "fizz"
+    objvec[mask5] = "buzz"
+    objvec[mask15] = "fizzbuzz"
     
     return objvec
-
-# --- Test the function ---
-# Example: FizzBuzz from 31 to 45
-result = FizzBuzz(31, 45)
-print(result)
